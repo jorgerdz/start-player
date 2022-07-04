@@ -5,8 +5,8 @@ const dev = process.env.NODE_ENV === 'development';
 export default {
     kit: {
         adapter: adapter({
-            pages: 'build',
-            assets: 'build',
+            pages: 'dist',
+            assets: 'dist',
             fallback: null,
             precompress: false,
             paths: {
