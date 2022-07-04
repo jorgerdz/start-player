@@ -1,7 +1,7 @@
 import { publish } from 'gh-pages';
 
 publish(
- 'build',
+ 'dist',
  {
   branch: 'gh-pages',
   repo: 'https://github.com/jorgerdz/start-player.git',
