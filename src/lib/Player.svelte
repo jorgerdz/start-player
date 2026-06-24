@@ -2,92 +2,106 @@
     export let x;
     export let y;
     export let playerNumber = 1;
-    export let state;
-    export let winner;
-    let color = getColor();
-    $: {
-        if ($state === 'show' && $winner !== playerNumber) {
-            color = 'grey'
-        }
-    }
+    export let state = 'await';
+    export let winner = null;
 
     function getColor() {
-        return `#${Math.floor(Math.random() * 16777215).toString(16)}`
+        return `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
     }
 
+    const color = getColor();
+    const ringId = `player-ring-${Math.random().toString(36).slice(2)}`;
+    const gradientId = `sphere-glow-${Math.random().toString(36).slice(2)}`;
+    $: displayColor = state === 'show' && winner !== playerNumber
+        ? 'rgba(255, 255, 255, 0.16)'
+        : color;
 </script>
 
-<div style="--color: {color}; --x: {x + '%'}; --y: {y + '%'}">
-<svg
+<div class="marker" style="--color: {displayColor}; --x: {x + '%'}; --y: {y + '%'}">
+    <svg
         xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
         viewBox="0 0 500 500"
-        class="s-E9_ygDPpv--5"
-        transform="translate(-100, -100)"
+        aria-hidden="true"
     >
-        <title class="s-E9_ygDPpv--5">Player {playerNumber} </title>
-        <circle cx="250" cy="250" r="250" />
-        <defs class="s-E9_ygDPpv--5">
+        <title>Player {playerNumber + 1}</title>
+        <defs>
             <path
-                d="M50,250c0-110.5,89.5-200,200-200s200,89.5,200,200s-89.5,200-200,200S50,360.5,50,250"
-                id="textcircle"
-                class="s-E9_ygDPpv--5"
-            >
-                <animateTransform
-                    attributeName="transform"
-                    begin="0s"
-                    dur="30s"
-                    type="rotate"
-                    from="0 250 250"
-                    to="360 250 250"
-                    repeatCount="indefinite"
-                    class="s-E9_ygDPpv--5"
-                />
-            </path>
+                id={ringId}
+                d="M250,55a195,195 0 1,1 0,390a195,195 0 1,1 0,-390"
+            />
+            <radialGradient id={gradientId} cx="35%" cy="28%" r="72%">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.82)" />
+                <stop offset="18%" stop-color="rgba(255,255,255,0.18)" />
+                <stop offset="100%" stop-color="rgba(0,0,0,0.18)" />
+            </radialGradient>
         </defs>
-        <text dy="0" textLength="1201" class="s-E9_ygDPpv--5">
-            <textPath xlink:href="#textcircle" class="s-E9_ygDPpv--5">
-                Player {playerNumber} • Player {playerNumber} •
-            </textPath>
-        </text>
-        <text dy="80" textLength="1200" class="s-E9_ygDPpv--5">
-            <textPath xlink:href="#textcircle" class="s-E9_ygDPpv--5">
-                State {$state} • Winner {$winner}
-            </textPath>
-        </text>
+
+        <circle class="sphere" cx="250" cy="250" r="178" />
+        <circle class="shine" cx="250" cy="250" r="178" fill={'url(#' + gradientId + ')'} />
+
+        <g class="spin">
+            <text>
+                <textPath href={'#' + ringId} textLength="1220">
+                    Player {playerNumber + 1} - hold steady - Player {playerNumber + 1} - hold steady -
+                </textPath>
+            </text>
+        </g>
     </svg>
 </div>
 
 <style>
-    div {
+    .marker {
         left: var(--x);
-        top: var(--y);
         position: absolute;
-        width: 35vw;
+        top: var(--y);
+        transform: translate(-50%, -50%);
+        width: clamp(132px, 36vmin, 260px);
+        aspect-ratio: 1;
+        pointer-events: none;
     }
-    circle {
+
+    .sphere {
         fill: var(--color);
+        transition: fill 180ms ease;
+    }
+
+    .shine {
+        mix-blend-mode: screen;
+        opacity: 0.82;
+    }
+
+    .spin {
+        animation: spin 18s linear infinite;
+        transform-origin: 250px 250px;
+    }
+
+    text {
+        fill: rgba(255, 255, 255, 0.9);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        user-select: none;
     }
 
     svg {
+        display: block;
+        height: 100%;
         width: 100%;
+        overflow: visible;
         user-select: none;
-        transform: translate(-50%, -50%); 
+    }
 
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
     }
-    svg textPath {
-        font-size: 63px;
-        font-family: sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 20px;
-        fill: white;
-        background: white;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-    svg text {
-        user-select: none;
+
+    @media (prefers-reduced-motion: reduce) {
+        .spin {
+            animation: none;
+        }
     }
 </style>
